@@ -3,11 +3,17 @@
 Simple snake game project made by Livia Schumm.
 
 Matriculation number: 120013603
+
 Course: GDV1, WS20/21 at FH Erfurt
 
 ## Installation
 
-[ ... ]
+The only needed installation is cloning this git repository by command
+
+```
+
+```
+
 
 ## Game Instructions
 

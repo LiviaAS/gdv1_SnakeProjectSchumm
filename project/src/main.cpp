@@ -5,5 +5,5 @@ void main()
 {
     CApplication Application;
 
-    RunApplication(800, 600, "MyGame", &Application);
+    RunApplication(800, 600, "My Snake Game", &Application);
 }

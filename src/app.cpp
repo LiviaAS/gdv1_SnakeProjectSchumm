@@ -1,24 +1,20 @@
 #pragma once
 #include "app.h"
-//#include "meshes.h"
+#include "meshes.h"
+#include "logic.h"
 
 CApplication::CApplication()
     : m_FieldOfViewY(60.0f)
 
 	, m_pCubeMesh(nullptr)
-	, m_pCubeTexture(nullptr)
+	, m_pCubeTextureWhite(nullptr)
 
-    , m_pCubeMeshSnake(nullptr)
-    , m_pCubeMeshBorders(nullptr)
+    //, m_pCubeMeshSnake(nullptr)
+    //, m_pCubeMeshBorders(nullptr)
 
-    , m_CameraPosition()
-    , m_CameraTarget()
+    //, m_CameraPosition()
+    //, m_CameraTarget()
 {
-
-    // camera perspective variables
-    this->m_CameraUp[0] = 0.0f;
-    this->m_CameraUp[1] = 1.0f;
-    this->m_CameraUp[2] = 0.0f;
 }
 
 // -----------------------------------------------------------------------------
@@ -31,6 +27,7 @@ CApplication::~CApplication()
 // individual functions for this application
 // -----------------------------------------------------------------------------
 
+/*
 void CApplication::CreateCube(BHandle * _ppMesh, BHandle _pTexture, float _EdgeLength)
 {
 	// -----------------------------------------------------------------------------
@@ -209,6 +206,12 @@ void CApplication::CreateCube(BHandle * _ppMesh, BHandle _pTexture, float _EdgeL
 
 // -----------------------------------------------------------------------------
 
+void CApplication::SetupGame()
+{
+}
+
+// -----------------------------------------------------------------------------
+
 void CApplication::EnlargeSnake()
 {
     /*
@@ -221,9 +224,11 @@ SEntity drawedCube = {
 };
 
 this->cubeVector.push_back(drawedCube);
-*/
+
 
 }
+
+*/
 
 // -----------------------------------------------------------------------------
 //  yoshix functions
@@ -260,6 +265,11 @@ bool CApplication::InternOnStartup()
 
     SetLightColor(LightAmbientColor, LightDiffuseColor, LightSpecularColor, 127);
 
+	// -----------------------------------------------------------------------------
+	// Setup the game with border boxes and snake
+	// -----------------------------------------------------------------------------
+	SetupGame();
+
     return true;
 }
 
@@ -278,7 +288,8 @@ bool CApplication::InternOnCreateTextures()
 	// Load an image from the given path and create a YoshiX texture representing
 	// the image.
 	// -----------------------------------------------------------------------------
-	CreateTexture("..\\data\\color_weiﬂ.jpg", &m_pCubeTexture);
+	CreateTexture("..\\data\\color_weiﬂ.jpg", &m_pCubeTextureWhite);
+	CreateTexture("..\\data\\rgb_cyan.png", &m_pCubeTextureCyan);
 
 	return true;
 }
@@ -290,18 +301,17 @@ bool CApplication::InternOnReleaseTextures()
 	// -----------------------------------------------------------------------------
 	// Important to release the texture again when the application is shut down.
 	// -----------------------------------------------------------------------------
-	ReleaseTexture(m_pCubeTexture);
+	ReleaseTexture(m_pCubeTextureWhite);
+	ReleaseTexture(m_pCubeTextureCyan);
 
 	return true;
 }
 
 // -----------------------------------------------------------------------------
 
-// -----------------------------------------------------------------------------
-
 bool CApplication::InternOnCreateMeshes()
 {
-	CreateCube(&m_pCubeMesh, m_pCubeTexture, 1.0f);
+	CreateCube(&m_pCubeMesh, m_pCubeTextureWhite, 1.0f);
 
     /*
     * CreateCubeMesh(m_pCubeMeshSnake);
@@ -361,7 +371,7 @@ bool CApplication::InternOnUpdate()
 	// -----------------------------------------------------------------------------
 	Eye[0] = 0.0f; At[0] = 0.0f; Up[0] = 0.0f;
 	Eye[1] = 0.0f; At[1] = 0.0f; Up[1] = 1.0f;
-	Eye[2] = -8.0f; At[2] = 0.0f; Up[2] = 0.0f;
+	Eye[2] = -50.0f; At[2] = 0.0f; Up[2] = 0.0f;
 
 	GetViewMatrix(Eye, At, Up, ViewMatrix);
 
@@ -386,40 +396,43 @@ bool CApplication::InternOnUpdate()
 
 bool CApplication::InternOnFrame()
 {
-	
-	float TranslationMatrix[16];
-	float RotationXMatrix[16];
-	float RotationYMatrix[16];
-	float RotationZMatrix[16];
-	float WorldMatrix[16];
-
-	// -----------------------------------------------------------------------------
-	// Set the position of the mesh in the world and draw it.
-	// -----------------------------------------------------------------------------
-	GetTranslationMatrix(0.0f, 0.0f, 0.0f, TranslationMatrix);
-
-	float m_AngleX = 0.0f;
-	float m_AngleY = 0.0f;
-	float m_AngleZ = 0.0f;
-
-	GetRotationXMatrix(m_AngleX, RotationXMatrix);
-	GetRotationYMatrix(m_AngleY, RotationYMatrix);
-	GetRotationZMatrix(m_AngleZ, RotationZMatrix);
-
-	m_AngleX = ::fmodf(m_AngleX + 0.002f, 360.0f);
-	m_AngleY = ::fmodf(m_AngleY + 0.002f, 360.0f);
-	m_AngleZ = ::fmodf(m_AngleZ + 0.002f, 360.0f);
-
-	MulMatrix(RotationZMatrix, RotationYMatrix, WorldMatrix);
-	MulMatrix(WorldMatrix, RotationXMatrix, WorldMatrix);
-	MulMatrix(WorldMatrix, TranslationMatrix, WorldMatrix);
-
-	SetWorldMatrix(WorldMatrix);
-
-	DrawMesh(m_pCubeMesh);
-
-    /* -----------------------------------------------------------------------------
-            THIS CAUSES ERROR
+	/* -----------------------------------------------------------------------------
+	*  LONG VERSION
+	*  -----------------------------------------------------------------------------
+	* 
+	* float TranslationMatrix[16];
+	* float RotationXMatrix[16];
+	* float RotationYMatrix[16];
+	* float RotationZMatrix[16];
+	* float WorldMatrix[16];
+	* 
+	* // -----------------------------------------------------------------------------
+	* // Set the position of the mesh in the world and draw it.
+	* // -----------------------------------------------------------------------------
+	* GetTranslationMatrix(0.0f, 0.0f, 0.0f, TranslationMatrix);
+	* 
+	* float m_AngleX = 0.0f;
+	* float m_AngleY = 0.0f;
+	* float m_AngleZ = 0.0f;
+	* 
+	* GetRotationXMatrix(m_AngleX, RotationXMatrix);
+	* GetRotationYMatrix(m_AngleY, RotationYMatrix);
+	* GetRotationZMatrix(m_AngleZ, RotationZMatrix);
+	* 
+	* m_AngleX = ::fmodf(m_AngleX + 0.002f, 360.0f);
+	* m_AngleY = ::fmodf(m_AngleY + 0.002f, 360.0f);
+	* m_AngleZ = ::fmodf(m_AngleZ + 0.002f, 360.0f);
+	* 
+	* MulMatrix(RotationZMatrix, RotationYMatrix, WorldMatrix);
+	* MulMatrix(WorldMatrix, RotationXMatrix, WorldMatrix);
+	* MulMatrix(WorldMatrix, TranslationMatrix, WorldMatrix);
+	* 
+	* SetWorldMatrix(WorldMatrix);
+	* 
+	* DrawMesh(m_pCubeMesh);
+	* 
+	* -----------------------------------------------------------------------------
+    */
     
     float WorldMatrix[16];
 
@@ -433,9 +446,9 @@ bool CApplication::InternOnFrame()
     // -----------------------------------------------------------------------------
     // Draw cube 1 with current set world matrix.
     // -----------------------------------------------------------------------------
-    DrawMesh(m_pCubeMeshSnake);
+    DrawMesh(m_pCubeMesh);
 
-    */
+  
 
     return true;
 }

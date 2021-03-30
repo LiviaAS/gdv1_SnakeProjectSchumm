@@ -24,35 +24,30 @@ private:
 
     float m_FieldOfViewY;			// Vertical view angle of the camera
 
-    BHandle m_pCubeTexture;         // A pointer to a YoshiX texture, which is part of the material covering the cube.
+    //textures
+    BHandle m_pCubeTextureWhite;    // A pointer to a white YoshiX texture
+    BHandle m_pCubeTextureCyan;     // A pointer to a cyan YoshiX texture
 
     // meshes
-    BHandle m_pCubeMesh;        // A pointer to a YoshiX mesh, which represents a single cube.
-    BHandle m_pCubeMeshSnake;
-    BHandle m_pCubeMeshBorders;
-
-    /*
+    BHandle m_pCubeMesh;            // A pointer to a YoshiX mesh, which represents a single cube.
+    //BHandle m_pCubeMeshSnake;
+    //BHandle m_pCubeMeshBorders;
+    
     // entities
-    SEntity pSnakeHead;             // cube entity as head of the snake
-    std::vector<SEntity> vSnake;	// for dynamic saving of cube entities 
-    SEntity Borders;
-    */
+    SEntity pSnakeHead;             // A cube entity as head of the snake
+    std::vector<SEntity> vSnake;	// A vector for dynamic saving of cube entities as snake-body
+    SEntity Borders[4];             // An array for the game area's borders
+    
 
-    // -----------------------------------------------------------------------------
+    /* -----------------------------------------------------------------------------
     // camera perspective variables
     // -----------------------------------------------------------------------------
     float m_CameraPosition[3];
     float m_CameraTarget[3];
     float m_CameraUp[3];
+    */
 
 private:
-    // -----------------------------------------------------------------------------
-    // individual functions for this application
-    // -----------------------------------------------------------------------------
-    
-    void CreateCube(BHandle* _ppMesh, BHandle _pTexture, float _EdgeLength);
-    void EnlargeSnake();
-
     // -----------------------------------------------------------------------------
     //  yoshix functions
     // -----------------------------------------------------------------------------

@@ -14,7 +14,7 @@ The only needed installation is cloning this git repository by following command
 git clone https://github.com/LiviaAS/gdv1_SnakeProjectSchumm.git
 ```
 
-Afterwards build and start the project on Windows in Visual Studio 2019. The project-file is located in ``` project/gdv1_snake_schumm.sln ```.
+Afterwards build and start the project on Windows in Visual Studio 2019. The project-file is located in ``` project/SnakeProject_Schumm.sln ```.
 
 ## Game Instructions
 

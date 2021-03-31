@@ -1,13 +1,19 @@
+#pragma once
+#include "yoshix_fix_function.h"
 #include "logic.h"
+using namespace gfx;
 
 // -----------------------------------------------------------------------------
-// individual functions for this applications game logic
+// Individual functions for this applications game logic
 // -----------------------------------------------------------------------------
 
-void SetupGame()
+/*
+IApplication SetupGame(SEntity aBorders[4], SEntity eSnakeHead)
 {
-
+	IApplication.
 }
+
+*/
 
 void EnlargeSnake()
 {

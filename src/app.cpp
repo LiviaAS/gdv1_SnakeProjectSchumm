@@ -7,8 +7,10 @@ CApplication::CApplication()
 
 	, m_GameOver(false)
 	, m_FoodHit(false)
+	, m_Collision(false)
 	, m_Direction(0)
 	, m_MoveIterator(0)
+	, m_BodyLength(0)
 
 	, m_pCubeMeshWhite(nullptr)
 	, m_pCubeMeshCyan(nullptr)
@@ -19,7 +21,7 @@ CApplication::CApplication()
 	, m_pCubeTextureGreen(nullptr)
 {
 	// -----------------------------------------------------------------------------
-	// Initialize member variable entities
+	// Initialize member variable entities.
 	// -----------------------------------------------------------------------------
 	for (int i = 0; i < 4; i++)
 	{
@@ -28,6 +30,12 @@ CApplication::CApplication()
 	};
 
 	this->m_sSnakeHead = {
+	};
+
+	for (int i = 0; i < (FIELD_SIZE*FIELD_SIZE); i++)
+	{
+		this->m_aSnakeBody[i] = {
+		};
 	};
 
 	this->m_sFood = {
@@ -47,7 +55,7 @@ CApplication::~CApplication()
 void CApplication::SetupGame()
 {
 	// -----------------------------------------------------------------------------
-	// Setting up game border boxes
+	// Setting up game border boxes.
 	// -----------------------------------------------------------------------------
 	// Top border
 	this->m_aBorders[0] = {		
@@ -78,16 +86,16 @@ void CApplication::SetupGame()
 	};
 
 	// -----------------------------------------------------------------------------
-	// Setting up snake head entity
+	// Setting up snake head entity.
 	// -----------------------------------------------------------------------------
 	this->m_sSnakeHead = {
 			FIELD_SIZE / 2		, FIELD_SIZE / 2	, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			BLOCK_SIZE			, BLOCK_SIZE		, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation		
+			//true				,								// Visibility	
 	};
 
 	// -----------------------------------------------------------------------------
-	// Setting up first random food block
+	// Setting up first random food block.
 	// -----------------------------------------------------------------------------
 	RandomFoodPosition();
 }
@@ -97,13 +105,10 @@ void CApplication::SetupGame()
 void CApplication::RandomFoodPosition()
 {
 	// -----------------------------------------------------------------------------
-	// Generating random position for food block
+	// Generating random position for food block.
 	// -----------------------------------------------------------------------------
 	float X, Y;
 	srand(time(0));
-
-	std::cout	<< "snake head x: " << this->m_sSnakeHead.aPosition[0] 
-				<< " snake head y: "<< this->m_sSnakeHead.aPosition[1] << std::endl;
 
 	if (this->m_sFood.aPosition[0] < 30)
 	{
@@ -121,22 +126,96 @@ void CApplication::RandomFoodPosition()
 		Y = (FIELD_SIZE / 2) + (rand() % (FIELD_SIZE - 1));
 	}
 
-	/*
-	float X = rand() % FIELD_SIZE;
-	float Y = rand() % FIELD_SIZE;
-	*/
-
-	std::cout << "random x: " << X << std::endl;
-	std::cout << "random y: " << Y << std::endl;
-
 	// -----------------------------------------------------------------------------
-	// Setting food block coordinates
+	// Set food block coordinates.
 	// -----------------------------------------------------------------------------
 	this->m_sFood = {
 			X					, Y					, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			BLOCK_SIZE			, BLOCK_SIZE		, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation		
 	};
+}
+
+// -----------------------------------------------------------------------------
+
+void CApplication::NavigateSnake()
+{
+	// -----------------------------------------------------------------------------
+	// Save snake head information in local Entity.
+	// -----------------------------------------------------------------------------
+	SEntity CurrentEntity = this->m_sSnakeHead;
+
+	// -----------------------------------------------------------------------------
+	// Change snake head position according to the currently given direction 
+	// on key event. Also check for collision with border boxes.
+	// -----------------------------------------------------------------------------
+	if (m_MoveIterator == 5)
+	{
+		if (m_Direction == DIR_UP)
+		{
+			if (this->m_sSnakeHead.aPosition[1] < (this->m_aBorders[0].aPosition[1] - BLOCK_SIZE))
+			{
+				this->m_sSnakeHead.aPosition[1] += BLOCK_SIZE;
+			}
+			else
+			{
+				m_Collision = true;
+			}
+		}
+
+		else if (m_Direction == DIR_RIGHT)
+		{
+			if (this->m_sSnakeHead.aPosition[0] < (this->m_aBorders[1].aPosition[0] - BLOCK_SIZE))
+			{
+				this->m_sSnakeHead.aPosition[0] += BLOCK_SIZE;
+			}
+			else
+			{
+				m_Collision = true;
+			}
+		}
+
+		else if (m_Direction == DIR_DOWN)
+		{
+			if (this->m_sSnakeHead.aPosition[1] > (this->m_aBorders[2].aPosition[1] + BLOCK_SIZE))
+			{
+				this->m_sSnakeHead.aPosition[1] -= BLOCK_SIZE;
+			}
+			else
+			{
+				m_Collision = true;
+			}
+		}
+
+		else if (m_Direction == DIR_LEFT)
+		{
+			if (this->m_sSnakeHead.aPosition[0] > (this->m_aBorders[3].aPosition[0] + BLOCK_SIZE))
+			{
+				this->m_sSnakeHead.aPosition[0] -= BLOCK_SIZE;
+			}
+			else
+			{
+				m_Collision = true;
+			}
+		}
+
+		m_MoveIterator = 0;
+	}
+	else
+	{
+		m_MoveIterator++;
+	}
+
+	// -----------------------------------------------------------------------------
+	// Iterating through the snakes body array to follow its head.
+	// -----------------------------------------------------------------------------
+	for (int i = 0; i <= m_BodyLength; i++)
+	{
+		//std::cout << Entity.aPosition[0] << std::endl;
+		this->m_aSnakeBody[i] = CurrentEntity;
+		CurrentEntity = this->m_aSnakeBody[i];
+		//std::cout << Entity.aPosition[1] << std::endl;
+		//std::cout << m_BodyLength;
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -144,7 +223,7 @@ void CApplication::RandomFoodPosition()
 bool CApplication::CheckCollision(SEntity _Entity1, SEntity _Entity2)
 {
 	// -----------------------------------------------------------------------------
-	// Check Collision between given 2 entities
+	// Checking Collision between given 2 entities.
 	// -----------------------------------------------------------------------------
 	bool Collision = false;
 
@@ -152,21 +231,6 @@ bool CApplication::CheckCollision(SEntity _Entity1, SEntity _Entity2)
 	{
 		Collision = true;
 	}
-	/* -----------------------------------------------------------------------------
-	// Check for border collision
-	// -----------------------------------------------------------------------------
-	if (this->m_sSnakeHead.aPosition[0] == this->m_aBorders[0].aPosition[0]
-		&& this->m_sSnakeHead.aPosition[0] == this->m_aBorders[2].aPosition[0])
-	{
-		Collision = true;
-	}
-
-	if (this->m_sSnakeHead.aPosition[1] == this->m_aBorders[1].aPosition[1]
-		&& this->m_sSnakeHead.aPosition[1] == this->m_aBorders[3].aPosition[1])
-	{
-		Collision = true;
-	}
-	*/
 	
 	return Collision;
 }
@@ -175,18 +239,21 @@ bool CApplication::CheckCollision(SEntity _Entity1, SEntity _Entity2)
 
 void CApplication::EnlargeSnake()
 {
-    /*
-* // save current cube in vector to be drawn
-SEntity drawedCube = {
-    &this->cubeMeshes[colorsIterator],
-    this->cubePtr.position[0], this->cubePtr.position[1], this->cubePtr.position[2],
-    this->cubePtr.scale[0], this->cubePtr.scale[1], this->cubePtr.scale[2],
-    this->cubePtr.rotation[0], this->cubePtr.rotation[1], this->cubePtr.rotation[2]
-};
+	// -----------------------------------------------------------------------------
+	// Adding 1 cube to the visible chain of the snakes body.
+	// -----------------------------------------------------------------------------
+	int i = 0;
+	/*
+	do 
+	{
 
-this->cubeVector.push_back(drawedCube);
-
-*/
+	} while (this->m_aSnakeBody->Visibility)
+	
+	for (int i = 0; i < (FIELD_SIZE * FIELD_SIZE); i++)
+	{
+		if
+	}
+	*/
 }
 
 // -----------------------------------------------------------------------------
@@ -225,7 +292,7 @@ bool CApplication::InternOnStartup()
     SetLightColor(LightAmbientColor, LightDiffuseColor, LightSpecularColor, 127);
 
 	// -----------------------------------------------------------------------------
-	// Setup the game with border boxes and snake head
+	// Setup the game with border boxes and snake head.
 	// -----------------------------------------------------------------------------
 	SetupGame();
 
@@ -342,15 +409,22 @@ bool CApplication::InternOnUpdate()
 	SetViewMatrix(ViewMatrix);
 
 	// -----------------------------------------------------------------------------
-	// Changig position of food block when hit
+	// Change position of food block when hit and lengthen the snakes body.
 	// -----------------------------------------------------------------------------
 	m_FoodHit = CheckCollision(this->m_sSnakeHead, this->m_sFood);
 
 	if (m_FoodHit)
 	{
 		RandomFoodPosition();
+		m_BodyLength++;
+		//EnlargeSnake();
 		m_FoodHit = false;
 	}
+
+	// -----------------------------------------------------------------------------
+	// Change snake position depending on direction.
+	// -----------------------------------------------------------------------------
+	NavigateSnake();
 
 	return true;
 }
@@ -403,7 +477,7 @@ bool CApplication::InternOnFrame()
     float WorldMatrix[16];
 
 	// -----------------------------------------------------------------------------
-	// Set border box meshes in the world and draw in cyan
+	// Set border box meshes in the world and draw in cyan.
 	// -----------------------------------------------------------------------------
 	for (int i = 0; i < 4; i++)
 	{
@@ -416,7 +490,7 @@ bool CApplication::InternOnFrame()
 	}
 
 	// -----------------------------------------------------------------------------
-	// Set snake head mesh in the world and draw in white
+	// Set snake head mesh in the world and draw in white.
 	// -----------------------------------------------------------------------------
 	GetTranslationMatrix(m_sSnakeHead.aPosition[0], m_sSnakeHead.aPosition[1], m_sSnakeHead.aPosition[2], WorldMatrix);
 	GetScaleMatrix(m_sSnakeHead.aScale[0], m_sSnakeHead.aScale[1], m_sSnakeHead.aScale[2], ScaleMatrix);
@@ -426,7 +500,20 @@ bool CApplication::InternOnFrame()
 	DrawMesh(m_pCubeMeshWhite);
 
 	// -----------------------------------------------------------------------------
-	// Set food block mesh in the world and draw in green
+	// Set snake body meshes in the world and draw in white.
+	// -----------------------------------------------------------------------------
+	for (int i = 0; i < m_BodyLength; i++)
+	{
+		GetTranslationMatrix(m_aSnakeBody[i].aPosition[0], m_aSnakeBody[i].aPosition[1], m_aSnakeBody[i].aPosition[2], WorldMatrix);
+		GetScaleMatrix(m_aSnakeBody[i].aScale[0], m_aSnakeBody[i].aScale[1], m_aSnakeBody[i].aScale[2], ScaleMatrix);
+		MulMatrix(ScaleMatrix, WorldMatrix, WorldMatrix);
+		SetWorldMatrix(WorldMatrix);
+
+		DrawMesh(m_pCubeMeshWhite);
+	}
+
+	// -----------------------------------------------------------------------------
+	// Set food block mesh in the world and draw in green.
 	// -----------------------------------------------------------------------------
 	GetTranslationMatrix(m_sFood.aPosition[0], m_sFood.aPosition[1], m_sFood.aPosition[2], WorldMatrix);
 	GetScaleMatrix(m_sFood.aScale[0], m_sFood.aScale[1], m_sFood.aScale[2], ScaleMatrix);
@@ -434,35 +521,6 @@ bool CApplication::InternOnFrame()
 	SetWorldMatrix(WorldMatrix);
 
 	DrawMesh(m_pCubeMeshGreen);
-
-	// -----------------------------------------------------------------------------
-	// Move snake position depending on direction
-	// -----------------------------------------------------------------------------
-	if (m_MoveIterator == 5)
-	{
-		if (m_Direction == DIR_UP && this->m_sSnakeHead.aPosition[1] < (this->m_aBorders[0].aPosition[1] - BLOCK_SIZE))
-		{
-			this->m_sSnakeHead.aPosition[1] += BLOCK_SIZE;
-		}
-		else if (m_Direction == DIR_RIGHT && this->m_sSnakeHead.aPosition[0] < (this->m_aBorders[1].aPosition[0] - BLOCK_SIZE))
-		{
-			this->m_sSnakeHead.aPosition[0] += BLOCK_SIZE;
-		}
-		else if (m_Direction == DIR_DOWN && this->m_sSnakeHead.aPosition[1] > (this->m_aBorders[2].aPosition[1] + BLOCK_SIZE))
-		{
-			this->m_sSnakeHead.aPosition[1] -= BLOCK_SIZE;
-		}
-		else if (m_Direction == DIR_LEFT && this->m_sSnakeHead.aPosition[0] > (this->m_aBorders[3].aPosition[0] + BLOCK_SIZE))
-		{
-			this->m_sSnakeHead.aPosition[0] -= BLOCK_SIZE;
-		}
-
-		m_MoveIterator = 0;
-	}
-	else
-	{
-		m_MoveIterator++;
-	}
 
     return true;
 }
@@ -472,7 +530,7 @@ bool CApplication::InternOnFrame()
 bool CApplication::InternOnKeyEvent(unsigned int _Key, bool _IsKeyDown, bool _IsAltDown)
 {
 	// -----------------------------------------------------------------------------
-	// Navigation of the snake
+	// Processing of different key inputs.
 	// -----------------------------------------------------------------------------
 	if ((_Key == W_KEY || _Key == UP_KEY) && m_Direction != DIR_DOWN)
 	{

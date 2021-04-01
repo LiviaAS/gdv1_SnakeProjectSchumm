@@ -4,8 +4,8 @@
 #include <vector>
 using namespace gfx;
 
-const float BLOCK_SIZE = 1;      // Size for one block in grid
-const int FIELD_SIZE = 40;     // Size for width AND height
+const float BLOCK_SIZE = 1;         // Size for one block in grid
+const int FIELD_SIZE = 40;          // Size for width AND height
 
 // Constant variables for direction adjustment
 const unsigned int DIR_UP       = 1;
@@ -28,6 +28,7 @@ struct SEntity
     //BHandle pMesh;
     float aPosition[3];
     float aScale[3];
+    bool Visibility;
     //float aRotation[3];
     //float aWorldMatrix[16];
 };
@@ -55,23 +56,26 @@ private:
 
     // Game Variables
     bool m_GameOver;                
-    bool m_FoodHit;               // Boolean needed for activation of new food block
+    bool m_FoodHit;                 // Boolean needed for activation of new food block
+    bool m_Collision;               // Boolean needed for collision detection
     int m_Direction;                // Variable needed for storing information about current snake direction 
-    int m_MoveIterator;             // Iterator needed for adjusting the snake movement's speed
+    int m_MoveIterator;             // Iterator needed for adjusting the snake movements speed
+    int m_BodyLength;               // Variable needed
 
     // Entities
-    SEntity m_sSnakeHead;           // A cube entity as head of the snake
-    //SEntity m_aSnakeBody[SNAKE_LENGTH_MAX];    // An array 
-    std::vector<SEntity> m_vSnake;	// A vector for dynamic saving of cube entities as snake-body
-    SEntity m_aBorders[4];          // An array for the game area's borders
-    SEntity m_sFood;                // A cube entity as food block
+    SEntity m_sSnakeHead;                                   // A cube entity as head of the snake
+    SEntity m_aSnakeBody[FIELD_SIZE*FIELD_SIZE];            // An array for storing the snakes body cube entities
+    //std::vector<SEntity> m_vSnake;	                    // A vector for dynamic saving of cube entities as snake-body
+    SEntity m_aBorders[4];                                  // An array for the game area's borders
+    SEntity m_sFood;                                        // A cube entity as food block
 
 private:
     // -----------------------------------------------------------------------------
     // Individual functions for this application
     // -----------------------------------------------------------------------------
-    void SetupGame();
-    void RandomFoodPosition();
+    void SetupGame();                                       // General setup 
+    void RandomFoodPosition();                              // Changing the food blocks position randomly
+    void NavigateSnake();                                   // General navigation of the snake head, needs to be called every frame
     bool CheckCollision(SEntity _Entity1, SEntity _Entity2);
     void EnlargeSnake();
 

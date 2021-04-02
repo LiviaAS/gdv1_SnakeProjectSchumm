@@ -75,7 +75,7 @@ private:
     // -----------------------------------------------------------------------------
     void SetupGame();                                       // General setup 
     void RandomFoodPosition();                              // Changing the food blocks position randomly
-    void NavigateSnake();                                   // General navigation of the snake head, needs to be called every frame
+    void NavigateSnake(SEntity _CurrentPosition);                                   // General navigation of the snake head, needs to be called every frame
     bool CheckCollision(SEntity _Entity1, SEntity _Entity2);
     void EnlargeSnake();
 

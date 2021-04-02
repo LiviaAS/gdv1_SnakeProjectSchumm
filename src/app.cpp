@@ -109,7 +109,7 @@ void CApplication::RandomFoodPosition()
 	// -----------------------------------------------------------------------------
 	float X, Y;
 	srand(time(0));
-
+	/*
 	if (this->m_sFood.aPosition[0] < 30)
 	{
 		X = 1 + (rand() % (FIELD_SIZE / 2));
@@ -125,6 +125,12 @@ void CApplication::RandomFoodPosition()
 	else {
 		Y = (FIELD_SIZE / 2) + (rand() % (FIELD_SIZE - 1));
 	}
+	*/
+
+	int Range = FIELD_SIZE - 2;
+
+	X = 1 + (rand() % Range);
+	Y = 1 + (rand() % Range);
 
 	// -----------------------------------------------------------------------------
 	// Set food block coordinates.
@@ -137,13 +143,8 @@ void CApplication::RandomFoodPosition()
 
 // -----------------------------------------------------------------------------
 
-void CApplication::NavigateSnake()
+void CApplication::NavigateSnake(SEntity _CurrentPosition)
 {
-	// -----------------------------------------------------------------------------
-	// Save snake head information in local Entity.
-	// -----------------------------------------------------------------------------
-	SEntity CurrentEntity = this->m_sSnakeHead;
-
 	// -----------------------------------------------------------------------------
 	// Change snake head position according to the currently given direction 
 	// on key event. Also check for collision with border boxes.
@@ -206,16 +207,36 @@ void CApplication::NavigateSnake()
 	}
 
 	// -----------------------------------------------------------------------------
-	// Iterating through the snakes body array to follow its head.
+	// Iterating through the snakes body array to follow its head. 
 	// -----------------------------------------------------------------------------
-	for (int i = 0; i <= m_BodyLength; i++)
+	// This should assign the previous in chain cubes position values to the
+	// the next cube but unfortunately doesn't work rather than keeps the arrays
+	// entities in position 0.
+	// -----------------------------------------------------------------------------
+	if (m_BodyLength > 0)
 	{
-		//std::cout << Entity.aPosition[0] << std::endl;
-		this->m_aSnakeBody[i] = CurrentEntity;
-		CurrentEntity = this->m_aSnakeBody[i];
-		//std::cout << Entity.aPosition[1] << std::endl;
-		//std::cout << m_BodyLength;
+	// -----------------------------------------------------------------------------
+	// Save snake head information in local Entity.
+	// -----------------------------------------------------------------------------
+		SEntity CurrentEntity = this->m_sSnakeHead;
+
+		for (int i = 0; i < m_BodyLength; i++)
+		{
+			//std::cout << Entity.aPosition[0] << std::endl;
+			this->m_aSnakeBody[i+1] = CurrentEntity;
+			std::cout << "CurrentEntitiy position X is: " << CurrentEntity.aPosition[0] << std::endl;
+
+			//CurrentEntity = this->m_aSnakeBody[i];
+			std::cout << "CurrentEntitiy position Y is: " << CurrentEntity.aPosition[1] << std::endl;
+			//std::cout << m_BodyLength;
+		}
+
+		//this->m_aSnakeBody[0] = this->m_sSnakeHead;
 	}
+	
+	
+
+	std::cout << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -417,6 +438,9 @@ bool CApplication::InternOnUpdate()
 	{
 		RandomFoodPosition();
 		m_BodyLength++;
+		//std::cout << "m_BodyLength is: " << m_BodyLength << std::endl;
+		//std::cout << "X position of last cube in array is: " << m_aSnakeBody[m_BodyLength-1].aPosition[0] << std::endl;
+		//std::cout << std::endl;
 		//EnlargeSnake();
 		m_FoodHit = false;
 	}
@@ -424,7 +448,7 @@ bool CApplication::InternOnUpdate()
 	// -----------------------------------------------------------------------------
 	// Change snake position depending on direction.
 	// -----------------------------------------------------------------------------
-	NavigateSnake();
+	NavigateSnake(this->m_sSnakeHead);
 
 	return true;
 }
@@ -510,6 +534,7 @@ bool CApplication::InternOnFrame()
 		SetWorldMatrix(WorldMatrix);
 
 		DrawMesh(m_pCubeMeshWhite);
+		//std::cout << "Snake body cube should be drawn." << std::endl;
 	}
 
 	// -----------------------------------------------------------------------------

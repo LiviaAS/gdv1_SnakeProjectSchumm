@@ -1,8 +1,6 @@
 ﻿  app.cpp
 C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(111,12): warning C4244: "Argument": Konvertierung von "time_t" in "unsigned int", möglicher Datenverlust
-C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(115,9): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(118,24): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(123,9): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(126,24): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(475,8): warning C4101: "RoationMatrix": Unreferenzierte lokale Variable
+C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(132,8): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(133,8): warning C4244: "=": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\src\app.cpp(499,8): warning C4101: "RoationMatrix": Unreferenzierte lokale Variable
   app.vcxproj -> C:\Users\Livia\Documents\Studium FH Erfurt\7. Semester\GDV 1 - 2.0\gdv1_SnakeProjectSchumm\bin\appd.exe

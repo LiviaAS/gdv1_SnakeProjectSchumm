@@ -18,4 +18,4 @@ Afterwards build and start the project on Windows in Visual Studio 2019. The pro
 
 ## Game Instructions
 
-Use <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to move the snakes head. Make sure to not bump into its own body.
+Use <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to move the green snakes head. Collect the white food blocks by navigating and the snakes tail will grow. But make sure not to bump into the walls or its own body otherwise you die.

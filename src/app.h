@@ -5,7 +5,8 @@
 using namespace gfx;
 
 const float BLOCK_SIZE = 1;         // Size for one block in grid
-const int FIELD_SIZE = 40;          // Size for width AND height
+const int FIELD_SIZE = 30;          // Size for width AND height
+const int MAX_SNAKELENGTH = FIELD_SIZE * FIELD_SIZE;
 
 // Constant variables for direction adjustment
 const unsigned int DIR_UP       = 1;
@@ -25,12 +26,8 @@ const unsigned int D_KEY        = 68;
 
 struct SEntity
 {
-    //BHandle pMesh;
     float aPosition[3];
     float aScale[3];
-    bool Visibility;
-    //float aRotation[3];
-    //float aWorldMatrix[16];
 };
 
 class CApplication : public IApplication
@@ -64,8 +61,8 @@ private:
 
     // Entities
     SEntity m_sSnakeHead;                                   // A cube entity as head of the snake
-    SEntity m_aSnakeBody[FIELD_SIZE*FIELD_SIZE];            // An array for storing the snakes body cube entities
-    //std::vector<SEntity> m_vSnake;	                    // A vector for dynamic saving of cube entities as snake-body
+    SEntity m_aSnakeBody[MAX_SNAKELENGTH];                  // An array for storing the snakes body cube entities
+    SEntity m_aSnakeBodyOld[MAX_SNAKELENGTH];               // An array to transfer old entities positions
     SEntity m_aBorders[4];                                  // An array for the game area's borders
     SEntity m_sFood;                                        // A cube entity as food block
 
@@ -75,9 +72,8 @@ private:
     // -----------------------------------------------------------------------------
     void SetupGame();                                       // General setup 
     void RandomFoodPosition();                              // Changing the food blocks position randomly
-    void NavigateSnake(SEntity _CurrentPosition);                                   // General navigation of the snake head, needs to be called every frame
-    bool CheckCollision(SEntity _Entity1, SEntity _Entity2);
-    void EnlargeSnake();
+    void NavigateSnake();                                   // General navigation of the snake head, needs to be called every frame
+    bool CheckCollision(SEntity _Entity1, SEntity _Entity2);// Function to check collision between 2 entities
 
     // -----------------------------------------------------------------------------
     //  YoshiX functions

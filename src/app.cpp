@@ -32,9 +32,11 @@ CApplication::CApplication()
 	this->m_sSnakeHead = {
 	};
 
-	for (int i = 0; i < (FIELD_SIZE*FIELD_SIZE); i++)
+	for (int i = 0; i < (MAX_SNAKELENGTH); i++)
 	{
 		this->m_aSnakeBody[i] = {
+		};
+		this->m_aSnakeBodyOld[i] = {
 		};
 	};
 
@@ -61,28 +63,24 @@ void CApplication::SetupGame()
 	this->m_aBorders[0] = {		
 			FIELD_SIZE / 2		, FIELD_SIZE		, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			FIELD_SIZE			, BLOCK_SIZE / 2	, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation	
 	};
 
 	// Right border
 	this->m_aBorders[1] = {		
 			FIELD_SIZE			, FIELD_SIZE / 2	, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			BLOCK_SIZE / 2		, FIELD_SIZE		, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation
 	};
 
 	// Bottom border
 	this->m_aBorders[2] = {		
 			FIELD_SIZE / 2		, 0.0f				, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			FIELD_SIZE			, BLOCK_SIZE / 2	, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation
 	};
 
 	// Left border
 	this->m_aBorders[3] = {		
 			0.0f				, FIELD_SIZE / 2	, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			BLOCK_SIZE / 2		, FIELD_SIZE		, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-		//	0.0f				, 0.0f				, 0.0f	,	// X- , Y- , Z- rotation		
 	};
 
 	// -----------------------------------------------------------------------------
@@ -91,7 +89,6 @@ void CApplication::SetupGame()
 	this->m_sSnakeHead = {
 			FIELD_SIZE / 2		, FIELD_SIZE / 2	, 0.0f	,	// X- , Y- , Z- coordinates in the world
 			BLOCK_SIZE			, BLOCK_SIZE		, 0.01f	,	// X- , Y- , Z- coordinates for scaling
-			//true				,								// Visibility	
 	};
 
 	// -----------------------------------------------------------------------------
@@ -108,29 +105,12 @@ void CApplication::RandomFoodPosition()
 	// Generating random position for food block.
 	// -----------------------------------------------------------------------------
 	float X, Y;
+	int RangeMax = FIELD_SIZE - 2;
+
 	srand(time(0));
-	/*
-	if (this->m_sFood.aPosition[0] < 30)
-	{
-		X = 1 + (rand() % (FIELD_SIZE / 2));
-	}
-	else {
-		X = (FIELD_SIZE / 2) + (rand() % (FIELD_SIZE - 1));
-	}
 
-	if (this->m_sFood.aPosition[1] < 30)
-	{
-		Y = 1 + (rand() % (FIELD_SIZE / 2));
-	}
-	else {
-		Y = (FIELD_SIZE / 2) + (rand() % (FIELD_SIZE - 1));
-	}
-	*/
-
-	int Range = FIELD_SIZE - 2;
-
-	X = 1 + (rand() % Range);
-	Y = 1 + (rand() % Range);
+	X = 1 + (rand() % RangeMax);
+	Y = 1 + (rand() % RangeMax);
 
 	// -----------------------------------------------------------------------------
 	// Set food block coordinates.
@@ -143,14 +123,17 @@ void CApplication::RandomFoodPosition()
 
 // -----------------------------------------------------------------------------
 
-void CApplication::NavigateSnake(SEntity _CurrentPosition)
+void CApplication::NavigateSnake()
 {
 	// -----------------------------------------------------------------------------
-	// Change snake head position according to the currently given direction 
-	// on key event. Also check for collision with border boxes.
+	// Set iterator condition to define the speed of the snake.
 	// -----------------------------------------------------------------------------
-	if (m_MoveIterator == 5)
+	if (m_MoveIterator == 6)
 	{
+		// -----------------------------------------------------------------------------
+		// Change snake head position according to the currently given direction 
+		// on key event. Also check for collision with border boxes.
+		// -----------------------------------------------------------------------------
 		if (m_Direction == DIR_UP)
 		{
 			if (this->m_sSnakeHead.aPosition[1] < (this->m_aBorders[0].aPosition[1] - BLOCK_SIZE))
@@ -199,44 +182,44 @@ void CApplication::NavigateSnake(SEntity _CurrentPosition)
 			}
 		}
 
+		// -----------------------------------------------------------------------------
+		// Iterating through the snakes body array to follow its head. 
+		// -----------------------------------------------------------------------------
+		if (m_BodyLength > 0)
+		{
+			// -----------------------------------------------------------------------------
+			// Transfer snake head information to first index of snake body array.
+			// -----------------------------------------------------------------------------
+			this->m_aSnakeBody[0] = this->m_sSnakeHead;
+
+			for (int i = 0; i < m_BodyLength; i++)
+			{
+				this->m_aSnakeBody[i + 1] = this->m_aSnakeBodyOld[i];
+				this->m_aSnakeBodyOld[i] = this->m_aSnakeBody[i];
+
+				// -----------------------------------------------------------------------------
+				// Check for snake collision with itself.
+				// -----------------------------------------------------------------------------
+				m_Collision = CheckCollision(this->m_sSnakeHead, this->m_aSnakeBody[i + 1]);
+				if (m_Collision)
+				{
+					m_GameOver = true;
+				}
+			}
+		}
+
+		// -----------------------------------------------------------------------------
+		// Reset iterator for timing.
+		// -----------------------------------------------------------------------------
 		m_MoveIterator = 0;
 	}
 	else
 	{
+		// -----------------------------------------------------------------------------
+		// Increase iterator for timing.
+		// -----------------------------------------------------------------------------
 		m_MoveIterator++;
-	}
-
-	// -----------------------------------------------------------------------------
-	// Iterating through the snakes body array to follow its head. 
-	// -----------------------------------------------------------------------------
-	// This should assign the previous in chain cubes position values to the
-	// the next cube but unfortunately doesn't work rather than keeps the arrays
-	// entities in position 0.
-	// -----------------------------------------------------------------------------
-	if (m_BodyLength > 0)
-	{
-	// -----------------------------------------------------------------------------
-	// Save snake head information in local Entity.
-	// -----------------------------------------------------------------------------
-		SEntity CurrentEntity = this->m_sSnakeHead;
-
-		for (int i = 0; i < m_BodyLength; i++)
-		{
-			//std::cout << Entity.aPosition[0] << std::endl;
-			this->m_aSnakeBody[i+1] = CurrentEntity;
-			std::cout << "CurrentEntitiy position X is: " << CurrentEntity.aPosition[0] << std::endl;
-
-			//CurrentEntity = this->m_aSnakeBody[i];
-			std::cout << "CurrentEntitiy position Y is: " << CurrentEntity.aPosition[1] << std::endl;
-			//std::cout << m_BodyLength;
-		}
-
-		//this->m_aSnakeBody[0] = this->m_sSnakeHead;
-	}
-	
-	
-
-	std::cout << std::endl;
+	}	
 }
 
 // -----------------------------------------------------------------------------
@@ -254,27 +237,6 @@ bool CApplication::CheckCollision(SEntity _Entity1, SEntity _Entity2)
 	}
 	
 	return Collision;
-}
-
-// -----------------------------------------------------------------------------
-
-void CApplication::EnlargeSnake()
-{
-	// -----------------------------------------------------------------------------
-	// Adding 1 cube to the visible chain of the snakes body.
-	// -----------------------------------------------------------------------------
-	int i = 0;
-	/*
-	do 
-	{
-
-	} while (this->m_aSnakeBody->Visibility)
-	
-	for (int i = 0; i < (FIELD_SIZE * FIELD_SIZE); i++)
-	{
-		if
-	}
-	*/
 }
 
 // -----------------------------------------------------------------------------
@@ -438,17 +400,13 @@ bool CApplication::InternOnUpdate()
 	{
 		RandomFoodPosition();
 		m_BodyLength++;
-		//std::cout << "m_BodyLength is: " << m_BodyLength << std::endl;
-		//std::cout << "X position of last cube in array is: " << m_aSnakeBody[m_BodyLength-1].aPosition[0] << std::endl;
-		//std::cout << std::endl;
-		//EnlargeSnake();
 		m_FoodHit = false;
 	}
 
 	// -----------------------------------------------------------------------------
 	// Change snake position depending on direction.
 	// -----------------------------------------------------------------------------
-	NavigateSnake(this->m_sSnakeHead);
+	NavigateSnake();	
 
 	return true;
 }
@@ -456,49 +414,24 @@ bool CApplication::InternOnUpdate()
 // -----------------------------------------------------------------------------
 
 bool CApplication::InternOnFrame()
-{
-	/* -----------------------------------------------------------------------------
-	*  LONG VERSION
-	*  -----------------------------------------------------------------------------
-	*
-	* float TranslationMatrix[16];
-	* float RotationXMatrix[16];
-	* float RotationYMatrix[16];
-	* float RotationZMatrix[16];
-	* float WorldMatrix[16];
-	*
-	* // -----------------------------------------------------------------------------
-	* // Set the position of the mesh in the world and draw it.
-	* // -----------------------------------------------------------------------------
-	* GetTranslationMatrix(0.0f, 0.0f, 0.0f, TranslationMatrix);
-	*
-	* float m_AngleX = 0.0f;
-	* float m_AngleY = 0.0f;
-	* float m_AngleZ = 0.0f;
-	*
-	* GetRotationXMatrix(m_AngleX, RotationXMatrix);
-	* GetRotationYMatrix(m_AngleY, RotationYMatrix);
-	* GetRotationZMatrix(m_AngleZ, RotationZMatrix);
-	*
-	* m_AngleX = ::fmodf(m_AngleX + 0.002f, 360.0f);
-	* m_AngleY = ::fmodf(m_AngleY + 0.002f, 360.0f);
-	* m_AngleZ = ::fmodf(m_AngleZ + 0.002f, 360.0f);
-	*
-	* MulMatrix(RotationZMatrix, RotationYMatrix, WorldMatrix);
-	* MulMatrix(WorldMatrix, RotationXMatrix, WorldMatrix);
-	* MulMatrix(WorldMatrix, TranslationMatrix, WorldMatrix);
-	*
-	* SetWorldMatrix(WorldMatrix);
-	*
-	* DrawMesh(m_pCubeMesh);
-	*
-	* -----------------------------------------------------------------------------
-	*/
-    
-	//float PositionMatrix[16];
-	float RoationMatrix[16];
+{    
 	float ScaleMatrix[16];
     float WorldMatrix[16];
+
+	// -----------------------------------------------------------------------------
+	// Stop the game when player collided / died.
+	// -----------------------------------------------------------------------------
+	if (m_GameOver)
+	{
+		puts("																		");
+		puts("																		");
+		puts("						    GAME OVER									");
+		puts("																		");
+		puts("						Sorry, you died !								");
+		puts("																		");
+		puts("																		\n");
+		StopApplication();
+	}
 
 	// -----------------------------------------------------------------------------
 	// Set border box meshes in the world and draw in cyan.
@@ -514,39 +447,41 @@ bool CApplication::InternOnFrame()
 	}
 
 	// -----------------------------------------------------------------------------
-	// Set snake head mesh in the world and draw in white.
+	// Set snake head mesh in the world and draw in green.
 	// -----------------------------------------------------------------------------
 	GetTranslationMatrix(m_sSnakeHead.aPosition[0], m_sSnakeHead.aPosition[1], m_sSnakeHead.aPosition[2], WorldMatrix);
 	GetScaleMatrix(m_sSnakeHead.aScale[0], m_sSnakeHead.aScale[1], m_sSnakeHead.aScale[2], ScaleMatrix);
 	MulMatrix(ScaleMatrix, WorldMatrix, WorldMatrix);
 	SetWorldMatrix(WorldMatrix);
 
-	DrawMesh(m_pCubeMeshWhite);
+	DrawMesh(m_pCubeMeshGreen);
 
 	// -----------------------------------------------------------------------------
-	// Set snake body meshes in the world and draw in white.
+	// Set snake body meshes in the world and draw in green.
 	// -----------------------------------------------------------------------------
-	for (int i = 0; i < m_BodyLength; i++)
+	if (m_BodyLength > 0)
 	{
-		GetTranslationMatrix(m_aSnakeBody[i].aPosition[0], m_aSnakeBody[i].aPosition[1], m_aSnakeBody[i].aPosition[2], WorldMatrix);
-		GetScaleMatrix(m_aSnakeBody[i].aScale[0], m_aSnakeBody[i].aScale[1], m_aSnakeBody[i].aScale[2], ScaleMatrix);
-		MulMatrix(ScaleMatrix, WorldMatrix, WorldMatrix);
-		SetWorldMatrix(WorldMatrix);
+		for (int i = 0; i < m_BodyLength; i++)
+		{
+			GetTranslationMatrix(m_aSnakeBody[i].aPosition[0], m_aSnakeBody[i].aPosition[1], m_aSnakeBody[i].aPosition[2], WorldMatrix);
+			GetScaleMatrix(m_aSnakeBody[i].aScale[0], m_aSnakeBody[i].aScale[1], m_aSnakeBody[i].aScale[2], ScaleMatrix);
+			MulMatrix(ScaleMatrix, WorldMatrix, WorldMatrix);
+			SetWorldMatrix(WorldMatrix);
 
-		DrawMesh(m_pCubeMeshWhite);
-		//std::cout << "Snake body cube should be drawn." << std::endl;
+			DrawMesh(m_pCubeMeshGreen);
+		}
 	}
 
 	// -----------------------------------------------------------------------------
-	// Set food block mesh in the world and draw in green.
+	// Set food block mesh in the world and draw in white.
 	// -----------------------------------------------------------------------------
 	GetTranslationMatrix(m_sFood.aPosition[0], m_sFood.aPosition[1], m_sFood.aPosition[2], WorldMatrix);
 	GetScaleMatrix(m_sFood.aScale[0], m_sFood.aScale[1], m_sFood.aScale[2], ScaleMatrix);
 	MulMatrix(ScaleMatrix, WorldMatrix, WorldMatrix);
 	SetWorldMatrix(WorldMatrix);
 
-	DrawMesh(m_pCubeMeshGreen);
-
+	DrawMesh(m_pCubeMeshWhite);
+	
     return true;
 }
 
